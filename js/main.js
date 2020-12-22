@@ -50,7 +50,7 @@ d3.json("./data/data.json").then(function (DATA) {
     draw_chart1()
 })
 
-Promise.all([d3.json("https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/world.geojson"),
+Promise.all([d3.json("./data/world.geojson"),
 d3.json("./data/data.json")]).then(function (DATA) {
     dataGeo = DATA[0]
     graph = DATA[1]
@@ -130,7 +130,6 @@ function fading (selected_ins) {
         .attr("r", d => 3 * (Math.sqrt(d.weight) * 1.5 + 0.6) / 2)
         .style("fill", COLOR(selected_ins))
         .style("opacity", 0.9)
-<<<<<<< HEAD
         
     chart1.selectAll("line")
         .transition()
@@ -146,9 +145,6 @@ function fading (selected_ins) {
         .attr("stroke-width",d => 2*Math.sqrt(d.weight)) 
         .attr("stroke-opacity",1)
         
-=======
-
->>>>>>> be512f064975f9a3a9229242cbea93e9eb5e393b
     // node.append("title")
     //     .text(function (d) { 
     //         return d.id })
