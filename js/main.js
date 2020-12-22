@@ -84,6 +84,7 @@ function fading (selected_ins) {
         .duration(500)
         .style("fill", "lightgrey")
         .attr("r", 1)
+        .style("opacity", 0.4)
     svg.selectAll("circle")
         .data(data)
         .filter(function (d) {
@@ -97,12 +98,14 @@ function fading (selected_ins) {
         .attr("r", function (d) {
             return Z(parseInt(d[z_attr])) + 1
         })
+        .style("opacity", 0.9)
     chart1
         .selectAll("circle")
         .transition()
         .duration(500)
         .attr("r", d => (Math.sqrt(d.weight)*1.5 + 0.6) / 2)
         .style("fill", "lightgrey")
+        .style("opacity", 0.4)
     chart1
         .selectAll("circle")
         .filter(function (d){
@@ -112,6 +115,7 @@ function fading (selected_ins) {
         .duration(500)
         .attr("r", d => 3 * (Math.sqrt(d.weight)*1.5 + 0.6) / 2)
         .style("fill", COLOR(selected_ins))
+        .style("opacity", 0.9)
         
     // node.append("title")
     //     .text(function (d) { 
@@ -124,6 +128,7 @@ function reset () {
         .duration(500)
         .attr('r', (d, i) => Z(parseInt(d[z_attr])))
         .style('fill', (d, i) => COLOR(d["Institution"]))
+        .style("opacity", 0.7)
     chart1.selectAll("circle")
         .transition()
         .duration(500)
@@ -135,6 +140,7 @@ function reset () {
             else if (e.weight<=150) return colorset[3];
             else return colorset[4];
         })
+        .style("opacity", 0.7)
 }
 
 
@@ -177,6 +183,7 @@ function draw_chart1 () {
             else if (e.weight<=150) return colorset[3];
             else return colorset[4];
         })
+        .style("opacity", 0.7)
         .on('mouseover', function(e, d){
             // console.log(d)
             fading(d.id)
@@ -354,6 +361,7 @@ function draw_chart2() {
             //console.log('data', d); 
             return x(parseInt(d[x_attr]))
         })
+        .style("opacity", 0.7)
         .attr('cy', (d, i) => y(parseInt(d[y_attr])))
         //.attr('r', 3)
         .attr('r', (d, i) => Z(parseInt(d[z_attr])))
