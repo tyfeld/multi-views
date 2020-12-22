@@ -9,6 +9,11 @@ let y_attr = 'Publications'
 //let z_attr = 'Publications Divided by Co-authors';
 let z_attr = 'H-index'
 let fontFamily
+var deg = {}
+let colorset = ["#2ed5eb", "#a1dab4","#41b6c4","#2c7fb8", "#253494"];
+
+let COLOR
+let Z
 
 let data = null
 let graph = null
@@ -33,7 +38,7 @@ d3.select("body")
 d3.csv(data_file).then(function (DATA) {
     data = DATA
     // remove data without x_attr or y_attr
-    data = data.filter((d, i) => (d[x_attr] != '' && d[y_attr] != ''))
+    data = data.filter((d, i) => (d[x_attr] != '' && d[y_attr] != '' && d[z_attr] != ''))
     //console.log(data)
     draw_chart2()
 })
@@ -43,6 +48,18 @@ d3.json("./data/data.json").then(function (DATA) {
    // console.log(graph)
     draw_chart1()
 })
+var chart1 = d3
+    .select("#chart1")
+    .append("svg")
+    .attr('width', width)
+    .attr('height', height0)
+let svg = d3
+    .select('#chart2')
+    .append("svg")
+    .attr('width', width)
+    .attr('height', height)
+
+
 function get_min_max (data, attr) {
     let min = 1e9
     let max = 0
@@ -57,27 +74,84 @@ function get_min_max (data, attr) {
 
     return [min, max]
 }
+
+
+// interactived group selection
+function fading (selected_ins) {
+    //console.log(selected_ins)
+    svg.selectAll("circle")
+        .transition()
+        .duration(500)
+        .style("fill", "lightgrey")
+        .attr("r", 1)
+    svg.selectAll("circle")
+        .data(data)
+        .filter(function (d) {
+            //console.log(selected_ins)
+            //console.log(COLOR(selected_ins))
+            return d.Institution == selected_ins
+        })
+        .transition()
+        .duration(500)
+        .style("fill", COLOR(selected_ins))
+        .attr("r", function (d) {
+            return Z(parseInt(d[z_attr])) + 1
+        })
+    chart1
+        .selectAll("circle")
+        .transition()
+        .duration(500)
+        .attr("r", d => (Math.sqrt(d.weight)*1.5 + 0.6) / 2)
+        .style("fill", "lightgrey")
+    chart1
+        .selectAll("circle")
+        .filter(function (d){
+            return d.id == selected_ins
+        })
+        .transition()
+        .duration(500)
+        .attr("r", d => 3 * (Math.sqrt(d.weight)*1.5 + 0.6) / 2)
+        .style("fill", COLOR(selected_ins))
+        
+    // node.append("title")
+    //     .text(function (d) { 
+    //         return d.id })
+}
+function reset () {
+    svg.selectAll('circle')
+        .data(data)
+        .transition()
+        .duration(500)
+        .attr('r', (d, i) => Z(parseInt(d[z_attr])))
+        .style('fill', (d, i) => COLOR(d["Institution"]))
+    chart1.selectAll("circle")
+        .transition()
+        .duration(500)
+        .attr("r", d => Math.sqrt(d.weight)*1.5 + 0.6)
+        .style("fill",function(e,d){
+            if (deg[e.id] == 1) return colorset[0];
+            else if (e.weight <=20) return colorset[1];
+            else if (e.weight <=80) return colorset[2];
+            else if (e.weight<=150) return colorset[3];
+            else return colorset[4];
+        })
+}
+
+
 function draw_chart1 () {
     // width *= 2
     // height *= 2
     
     console.log(width,height)
-    var chart1 = d3.select("#chart1")
-    .select("svg")
-    .attr('width', width)
-    .attr('height', height0)
-
     //.attr("viewBox", [0, 0, 0.9*width, height]);
-    var du = {}
     nodes = graph.nodes
     links = graph.links
-    let colorset = ["#2ed5eb", "#a1dab4","#41b6c4","#2c7fb8", "#253494"];
     for (i in nodes){
-        du[nodes[i].id] = 0;
+        deg[nodes[i].id] = 0;
     }
     for (l in links){
-        du[links[l].source] += 1;
-        du[links[l].target] += 1;
+        deg[links[l].source] += 1;
+        deg[links[l].target] += 1;
     }
     console.log(width)
     
@@ -97,12 +171,17 @@ function draw_chart1 () {
     var circles = node.append("circle")
         .attr("r", d => Math.sqrt(d.weight)*1.5 + 0.6)
         .attr("fill",function(e,d){
-            if (du[e.id] == 1) return colorset[0];
+            if (deg[e.id] == 1) return colorset[0];
             else if (e.weight <=20) return colorset[1];
             else if (e.weight <=80) return colorset[2];
             else if (e.weight<=150) return colorset[3];
             else return colorset[4];
         })
+        .on('mouseover', function(e, d){
+            // console.log(d)
+            fading(d.id)
+        })
+        .on('mouseleave', reset)
         .call(d3.drag()
             .on("start", dragstarted)
             .on("drag", dragged)
@@ -141,27 +220,31 @@ function draw_chart1 () {
 }
 function draw_chart2() {
     //right之前是0.5
-    let padding = { 'left': 0.1 * width, 'bottom': 0.2 * height, 'top': 0.1 * height, 'right': 0.2 * width }
+    let padding = { 'left': 0.1 * width, 'bottom': 0.1 * height, 'top': 0.1 * height, 'right': 0.05 * width }
     var allGroup = ["All"]
+   //console.log(String(data[0].Institution))
     for (var i = 0; i < data.length; i++) {
-        if ((i == 0) || (data[i].Institution != data[i - 1].Institution)) {
+        flag = true
+        for (var j = 1; j < allGroup.length ; j++){
+            if (String(data[i].Institution) == allGroup[j]){
+                flag = false;
+                break
+            }
+        }
+        if (flag ){
             allGroup.push(data[i].Institution)
         }
     };
     console.log(allGroup)
-    var colorgroup = ["", "Aqua", "#CD853F", "BlueViolet", "Brown", "DarkCyan", "Crimson", "DarkOliveGreen", "DarkOrange",
-        "DarkTurquoise", "#FF1493", "#B22222", "#FFD700", "#228B22", "#FF69B4", "#4B0082", "##000080", "##00FA9A", "#778899",
-        "#DDA0DD", "#808000", "#DA70D6", "#B0E0E6", "#2E8B57", "#D2B48C", "#008080", "#FF6347", "#40E0D0", "#C0C0C0"]
+    var colorgroup = ["grey", "Aqua", "#CD853F", "BlueViolet", "Brown", "DarkCyan", "Crimson", "DarkOliveGreen", "DarkOrange",
+        "DarkTurquoise", "#FF1493", "#B22222", "#FFD700", "#228B22", "#FF69B4", "#4B0082", "#000080", "#00FA9A", "#778899",
+        "#DDA0DD", "Red", "#DA70D6", "#B0E0E6", "#2E8B57", "#D2B48C", "#008080", "#FF6347", "#40E0D0", "#C0C0C0"]
 
-    //console.log(allGroup.length);
+    console.log(allGroup.length);
+    console.log(colorgroup.length)
     // title
-    let svg = d3
-    .select('#chart2')
-    .select("svg")
-    .attr('width', width)
-    .attr('height', height)
     svg.append('g')
-        .attr('transform', `translate(${padding.left + (width - padding.left - padding.right) / 2}, ${padding.top * 0.4})`)
+        .attr('transform', `translate(${padding.left + (width - padding.left - padding.right) / 2 - 180}, ${padding.top * 0.4})`)
         .append('text')
         .attr('class', 'title')
         .text('A Visualization for Faculties That Research on Computer Science in Well-known Universities')
@@ -177,7 +260,7 @@ function draw_chart2() {
         .ticks(10)
         .tickFormat(d => d)
 
-    let z = d3.scaleLinear()
+    Z = d3.scaleLinear()
         .domain(get_min_max(data, z_attr))
         .range([1, 15])
 
@@ -191,9 +274,11 @@ function draw_chart2() {
         .tickFormat(d => d)
 
     // color scale
-    let color = d3.scaleOrdinal()
+    COLOR = d3.scaleOrdinal()
         .domain(allGroup)
         .range(colorgroup)
+
+    console.log(COLOR("Stanford University"))
     // x axis
     let xxs = svg.append('g')
         .attr('transform', `translate(${0}, ${height - padding.bottom})`)
@@ -202,7 +287,7 @@ function draw_chart2() {
         .attr('font-size', '0.8rem')
 
     svg.append('g')
-        .attr('transform', `translate(${padding.left + (width - padding.left - padding.right) / 2}, ${height - padding.bottom})`)
+        .attr('transform', `translate(${padding.left + (width - padding.left - padding.right) / 2 - 30}, ${height - padding.bottom + 5})`)
         .append('text')
         .attr('class', 'axis_label')
         .attr('dx', '-0.4rem')
@@ -271,8 +356,8 @@ function draw_chart2() {
         })
         .attr('cy', (d, i) => y(parseInt(d[y_attr])))
         //.attr('r', 3)
-        .attr('r', (d, i) => z(parseInt(d[z_attr])))
-        .attr('fill', (d, i) => color(d["Institution"]))
+        .attr('r', (d, i) => Z(parseInt(d[z_attr])))
+        .attr('fill', (d, i) => COLOR(d["Institution"]))
         .on('mouseover', (e, d) => {
             // show a tooltip
             let name = d['First Name'] + ' ' + d['Mid Name'] + ' ' + d['Last Name']
@@ -401,34 +486,6 @@ function draw_chart2() {
             updateChart(selectedGroup)
         })
 
-
-    // interactived group selection
-    function fading (selected_ins) {
-        svg.selectAll("circle")
-            .transition()
-            .duration(500)
-            .style("fill", "lightgrey")
-            .attr("r", 1)
-        svg.selectAll("circle")
-            .data(data)
-            .filter(function (d) {
-                return d.Institution == selected_ins
-            })
-            .transition()
-            .duration(500)
-            .style("fill", color(selected_ins))
-            .attr("r", function (d) {
-                return z(parseInt(d[z_attr])) + 1
-            })
-    }
-    function reset () {
-        svg.selectAll('circle')
-            .data(data)
-            .transition()
-            .duration(500)
-            .attr('r', (d, i) => z(parseInt(d[z_attr])))
-            .style('fill', (d, i) => color(d["Institution"]))
-    }
 }
 
 
