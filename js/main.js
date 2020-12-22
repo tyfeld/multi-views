@@ -117,6 +117,20 @@ function fading (selected_ins) {
         .style("fill", COLOR(selected_ins))
         .style("opacity", 0.9)
         
+    chart1.selectAll("line")
+        .transition()
+        .duration(500)
+        .attr("stroke-width",d => 0.5*Math.sqrt(d.weight)) 
+        .attr("stroke-opacity", 0.2)
+    chart1.selectAll("line")
+        .filter(function (d) {
+            return d.source.id == selected_ins;
+        })
+        .transition()
+        .duration(500)
+        .attr("stroke-width",d => 2*Math.sqrt(d.weight)) 
+        .attr("stroke-opacity",1)
+        
     // node.append("title")
     //     .text(function (d) { 
     //         return d.id })
@@ -141,6 +155,11 @@ function reset () {
             else return colorset[4];
         })
         .style("opacity", 0.7)
+    chart1.selectAll("line")
+        .transition()
+        .duration(500)
+        .attr("stroke-width",d => Math.sqrt(d.weight)) 
+        .attr("stroke-opacity", 0.6)
 }
 
 
@@ -167,6 +186,7 @@ function draw_chart1 () {
         .data(graph.links)
         .enter().append("line")
         .attr("stroke-width", function (d) { return Math.sqrt(d.weight) })
+        .attr("stroke-opacity",0.6)
 
     var node = chart1.append("g")
         .attr("class", "nodes")
