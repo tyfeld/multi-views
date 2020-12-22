@@ -2,21 +2,22 @@ let _width = $(window).width()
 let _height = $(window).height()
 let width0 = 0.9 * _width
 let height0 = 0.96 * _height
-let width = width0/2
-let height = height0/ 2.4
+let width = width0 / 2
+let height = height0 / 2.4
 let x_attr = 'Ph.D. Graduation Year'
 let y_attr = 'Publications'
 //let z_attr = 'Publications Divided by Co-authors';
 let z_attr = 'H-index'
 let fontFamily
 var deg = {}
-let colorset = ["#2ed5eb", "#a1dab4","#41b6c4","#2c7fb8", "#253494"];
+let colorset = ["#2ed5eb", "#a1dab4", "#41b6c4", "#2c7fb8", "#253494"]
 
 let COLOR
 let Z
 
 let data = null
 let graph = null
+let dataGeo = null
 let data_file = './data/data.csv'
 let ua = navigator.userAgent.toLowerCase()
 fontFamily = "Khand-Regular"
@@ -26,7 +27,7 @@ if (/\(i[^;]+;( U;)? CPU.+Mac OS X/gi.test(ua)) {
 var simulation = d3.forceSimulation()
     .force("link", d3.forceLink().id(function (d) { return d.id }))
     .force("charge", d3.forceManyBody().strength(-50))
-    .force("center", d3.forceCenter(width/2, height0/2))
+    .force("center", d3.forceCenter(width / 2, height0 / 2))
 
 //fontFamily = "";
 d3.select("body")
@@ -45,9 +46,17 @@ d3.csv(data_file).then(function (DATA) {
 
 d3.json("./data/data.json").then(function (DATA) {
     graph = DATA
-   // console.log(graph)
+    // console.log(graph)
     draw_chart1()
 })
+
+Promise.all([d3.json("https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/world.geojson"),
+d3.json("./data/data.json")]).then(function (DATA) {
+    dataGeo = DATA[0]
+    graph = DATA[1]
+    draw_chart3()
+})
+
 var chart1 = d3
     .select("#chart1")
     .append("svg")
@@ -59,7 +68,12 @@ let svg = d3
     .attr('width', width)
     .attr('height', height)
 
-
+let chart3 = d3
+    .select("#chart3")
+    .append("svg")
+    .attr('width', width)
+    .attr('height', height)
+draw_chart3()
 function get_min_max (data, attr) {
     let min = 1e9
     let max = 0
@@ -103,19 +117,20 @@ function fading (selected_ins) {
         .selectAll("circle")
         .transition()
         .duration(500)
-        .attr("r", d => (Math.sqrt(d.weight)*1.5 + 0.6) / 2)
+        .attr("r", d => (Math.sqrt(d.weight) * 1.5 + 0.6) / 2)
         .style("fill", "lightgrey")
         .style("opacity", 0.4)
     chart1
         .selectAll("circle")
-        .filter(function (d){
+        .filter(function (d) {
             return d.id == selected_ins
         })
         .transition()
         .duration(500)
-        .attr("r", d => 3 * (Math.sqrt(d.weight)*1.5 + 0.6) / 2)
+        .attr("r", d => 3 * (Math.sqrt(d.weight) * 1.5 + 0.6) / 2)
         .style("fill", COLOR(selected_ins))
         .style("opacity", 0.9)
+<<<<<<< HEAD
         
     chart1.selectAll("line")
         .transition()
@@ -131,6 +146,9 @@ function fading (selected_ins) {
         .attr("stroke-width",d => 2*Math.sqrt(d.weight)) 
         .attr("stroke-opacity",1)
         
+=======
+
+>>>>>>> be512f064975f9a3a9229242cbea93e9eb5e393b
     // node.append("title")
     //     .text(function (d) { 
     //         return d.id })
@@ -146,13 +164,13 @@ function reset () {
     chart1.selectAll("circle")
         .transition()
         .duration(500)
-        .attr("r", d => Math.sqrt(d.weight)*1.5 + 0.6)
-        .style("fill",function(e,d){
-            if (deg[e.id] == 1) return colorset[0];
-            else if (e.weight <=20) return colorset[1];
-            else if (e.weight <=80) return colorset[2];
-            else if (e.weight<=150) return colorset[3];
-            else return colorset[4];
+        .attr("r", d => Math.sqrt(d.weight) * 1.5 + 0.6)
+        .style("fill", function (e, d) {
+            if (deg[e.id] == 1) return colorset[0]
+            else if (e.weight <= 20) return colorset[1]
+            else if (e.weight <= 80) return colorset[2]
+            else if (e.weight <= 150) return colorset[3]
+            else return colorset[4]
         })
         .style("opacity", 0.7)
     chart1.selectAll("line")
@@ -166,20 +184,20 @@ function reset () {
 function draw_chart1 () {
     // width *= 2
     // height *= 2
-    
-    console.log(width,height)
+
+    //console.log(width,height)
     //.attr("viewBox", [0, 0, 0.9*width, height]);
     nodes = graph.nodes
     links = graph.links
-    for (i in nodes){
-        deg[nodes[i].id] = 0;
+    for (i in nodes) {
+        deg[nodes[i].id] = 0
     }
-    for (l in links){
-        deg[links[l].source] += 1;
-        deg[links[l].target] += 1;
+    for (l in links) {
+        deg[links[l].source] += 1
+        deg[links[l].target] += 1
     }
-    console.log(width)
-    
+    //console.log(width)
+
     var link = chart1.append("g")
         .attr("class", "links")
         .selectAll("line")
@@ -195,16 +213,16 @@ function draw_chart1 () {
         .enter().append("g")
 
     var circles = node.append("circle")
-        .attr("r", d => Math.sqrt(d.weight)*1.5 + 0.6)
-        .attr("fill",function(e,d){
-            if (deg[e.id] == 1) return colorset[0];
-            else if (e.weight <=20) return colorset[1];
-            else if (e.weight <=80) return colorset[2];
-            else if (e.weight<=150) return colorset[3];
-            else return colorset[4];
+        .attr("r", d => Math.sqrt(d.weight) * 1.5 + 0.6)
+        .attr("fill", function (e, d) {
+            if (deg[e.id] == 1) return colorset[0]
+            else if (e.weight <= 20) return colorset[1]
+            else if (e.weight <= 80) return colorset[2]
+            else if (e.weight <= 150) return colorset[3]
+            else return colorset[4]
         })
         .style("opacity", 0.7)
-        .on('mouseover', function(e, d){
+        .on('mouseover', function (e, d) {
             // console.log(d)
             fading(d.id)
         })
@@ -222,8 +240,9 @@ function draw_chart1 () {
     //     .attr('y', 3)
 
     node.append("title")
-        .text(function (d) { 
-            return d.id })
+        .text(function (d) {
+            return d.id
+        })
 
     simulation
         .nodes(graph.nodes)
@@ -245,30 +264,30 @@ function draw_chart1 () {
             })
     }
 }
-function draw_chart2() {
+function draw_chart2 () {
     //right之前是0.5
     let padding = { 'left': 0.1 * width, 'bottom': 0.1 * height, 'top': 0.1 * height, 'right': 0.05 * width }
     var allGroup = ["All"]
-   //console.log(String(data[0].Institution))
+    //console.log(String(data[0].Institution))
     for (var i = 0; i < data.length; i++) {
         flag = true
-        for (var j = 1; j < allGroup.length ; j++){
-            if (String(data[i].Institution) == allGroup[j]){
-                flag = false;
+        for (var j = 1; j < allGroup.length; j++) {
+            if (String(data[i].Institution) == allGroup[j]) {
+                flag = false
                 break
             }
         }
-        if (flag ){
+        if (flag) {
             allGroup.push(data[i].Institution)
         }
     };
-    console.log(allGroup)
+    //console.log(allGroup)
     var colorgroup = ["grey", "Aqua", "#CD853F", "BlueViolet", "Brown", "DarkCyan", "Crimson", "DarkOliveGreen", "DarkOrange",
         "DarkTurquoise", "#FF1493", "#B22222", "#FFD700", "#228B22", "#FF69B4", "#4B0082", "#000080", "#00FA9A", "#778899",
         "#DDA0DD", "Red", "#DA70D6", "#B0E0E6", "#2E8B57", "#D2B48C", "#008080", "#FF6347", "#40E0D0", "#C0C0C0"]
 
-    console.log(allGroup.length);
-    console.log(colorgroup.length)
+    //console.log(allGroup.length);
+    //console.log(colorgroup.length)
     // title
     svg.append('g')
         .attr('transform', `translate(${padding.left + (width - padding.left - padding.right) / 2 - 180}, ${padding.top * 0.4})`)
@@ -517,23 +536,90 @@ function draw_chart2() {
 }
 
 
-function dragstarted(event) {
-    if (!event.active) simulation.alphaTarget(0.3).restart();
-    event.subject.fx = event.subject.x;
-    event.subject.fy = event.subject.y;
-  }
-  
-  function dragged(event) {
-    event.subject.fx = event.x;
-    event.subject.fy = event.y;
-  }
-  
-  function dragended(event) {
-    if (!event.active) simulation.alphaTarget(0);
-    event.subject.fx = null;
-    event.subject.fy = null;
-  }
+function dragstarted (event) {
+    if (!event.active) simulation.alphaTarget(0.3).restart()
+    event.subject.fx = event.subject.x
+    event.subject.fy = event.subject.y
+}
 
+function dragged (event) {
+    event.subject.fx = event.x
+    event.subject.fy = event.y
+}
+
+function dragended (event) {
+    if (!event.active) simulation.alphaTarget(0)
+    event.subject.fx = null
+    event.subject.fy = null
+}
+
+
+
+function draw_chart3 () {
+    var dic = {
+        "Zhejiang University": [30, 120],
+        "University of Wisconsin - Madison": [43, -89],
+    }
+    // Map and projection
+    var projection = d3.geoMercator()
+        .scale(85)
+        .translate([width / 2, height / 2 * 1.3])
+
+    // A path generator
+    var path = d3.geoPath()
+        .projection(projection)
+        
+    console.log(dataGeo)
+    console.log(graph)
+    ready(dataGeo, graph)
+    function ready (dataGeo, data) {
+        link = []
+        console.log("1")
+        //console.log(+dic["Zhejiang University"][0])
+        let source = [+dic["Zhejiang University"][1], +dic["Zhejiang University"][0]]
+        //console.log(typeof(source))
+        let target = [+dic["University of Wisconsin - Madison"][1], +dic["University of Wisconsin - Madison"][0]]
+        //console.log([source, target])
+        // Reformat the list of link. Note that columns in csv file are called long1, long2,    lat1[], lat2
+        topush1 = { type: "LineString", coordinates: [source, target] }
+        topush2 = { type: "LineString", coordinates: [[100, 60], [-60, -30]] }
+        //console.log((topush.coordinates))
+        //var link = {type: "LineString", coordinates: }
+        //
+        link.push(topush1)
+        link.push(topush2)
+        console.log(link)
+        // let links = data.links
+        // for (l in data.links) {
+        //     //topush = { type: "LineString", coordinates: [source, target] }
+        //     //link.push(topush)
+        // }
+
+        // Draw the map
+        chart3.append("g")
+            .selectAll("path")
+            .data(dataGeo.features)
+            .enter().append("path")
+            .attr("fill", "#b8b8b8")
+            .attr("d", d3.geoPath()
+                .projection(projection)
+            )
+            .style("stroke", "#fff")
+            .style("stroke-width", 0)
+
+        // Add the path
+        chart3.selectAll("myPath")
+            .data(link)
+            .enter()
+            .append("path")
+            .attr("d", function (d) { return path(d) })
+            //.attr("d", path(link))
+            .style("fill", "none")
+            .style("stroke", "#69b3a2")
+            .style("stroke-width", 2)
+
+    }
+}
 
 
 

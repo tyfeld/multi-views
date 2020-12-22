@@ -50,6 +50,11 @@ html,body {
     float: left;
 }
 
+#chart3{
+    position: relative;
+    float: left;
+}
+
 
 
 #barr {
