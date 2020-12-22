@@ -63,9 +63,10 @@ function draw_chart1 () {
     
     console.log(width,height)
     var chart1 = d3.select("#chart1")
-    .append("svg")
+    .select("svg")
     .attr('width', width)
     .attr('height', height0)
+
     //.attr("viewBox", [0, 0, 0.9*width, height]);
     var du = {}
     nodes = graph.nodes
@@ -147,6 +148,7 @@ function draw_chart2() {
             allGroup.push(data[i].Institution)
         }
     };
+    console.log(allGroup)
     var colorgroup = ["", "Aqua", "#CD853F", "BlueViolet", "Brown", "DarkCyan", "Crimson", "DarkOliveGreen", "DarkOrange",
         "DarkTurquoise", "#FF1493", "#B22222", "#FFD700", "#228B22", "#FF69B4", "#4B0082", "##000080", "##00FA9A", "#778899",
         "#DDA0DD", "#808000", "#DA70D6", "#B0E0E6", "#2E8B57", "#D2B48C", "#008080", "#FF6347", "#40E0D0", "#C0C0C0"]
@@ -155,7 +157,7 @@ function draw_chart2() {
     // title
     let svg = d3
     .select('#chart2')
-    .append("svg")
+    .select("svg")
     .attr('width', width)
     .attr('height', height)
     svg.append('g')
