@@ -1,7 +1,7 @@
 let _width = $(window).width()
 let _height = $(window).height()
-let width0 = 0.9 * _width
-let height0 = 0.96 * _height
+let width0 = 0.98 * _width
+let height0 = 0.98 * _height
 let width = width0 / 2
 let height = height0 / 2.4
 let x_attr = 'Ph.D. Graduation Year'
@@ -10,10 +10,13 @@ let y_attr = 'Publications'
 let z_attr = 'H-index'
 let fontFamily
 var deg = {}
+let allGroup
 let colorset = ["#2ed5eb", "#a1dab4", "#41b6c4", "#2c7fb8", "#253494"]
 
 let COLOR
 let Z
+let Inst = {}
+let InInst = {}
 
 let data = null
 let graph = null
@@ -27,7 +30,7 @@ if (/\(i[^;]+;( U;)? CPU.+Mac OS X/gi.test(ua)) {
 var simulation = d3.forceSimulation()
     .force("link", d3.forceLink().id(function (d) { return d.id }))
     .force("charge", d3.forceManyBody().strength(-50))
-    .force("center", d3.forceCenter(width / 2, height0 / 2))
+    .force("center", d3.forceCenter(3 * width / 5, height0 / 2))
 
 //fontFamily = "";
 d3.select("body")
@@ -96,7 +99,6 @@ function fading (selected_ins) {
     svg.selectAll("circle")
         .transition()
         .duration(500)
-        .style("fill", "lightgrey")
         .attr("r", 1)
         .style("opacity", 0.4)
     svg.selectAll("circle")
@@ -108,7 +110,6 @@ function fading (selected_ins) {
         })
         .transition()
         .duration(500)
-        .style("fill", COLOR(selected_ins))
         .attr("r", function (d) {
             return Z(parseInt(d[z_attr])) + 1
         })
@@ -118,7 +119,6 @@ function fading (selected_ins) {
         .transition()
         .duration(500)
         .attr("r", d => (Math.sqrt(d.weight) * 1.5 + 0.6) / 2)
-        .style("fill", "lightgrey")
         .style("opacity", 0.4)
     chart1
         .selectAll("circle")
@@ -128,7 +128,6 @@ function fading (selected_ins) {
         .transition()
         .duration(500)
         .attr("r", d => 3 * (Math.sqrt(d.weight) * 1.5 + 0.6) / 2)
-        .style("fill", COLOR(selected_ins))
         .style("opacity", 0.9)
         
     chart1.selectAll("line")
@@ -150,24 +149,33 @@ function fading (selected_ins) {
     //         return d.id })
 }
 function reset () {
+    svg.selectAll("circle")
+        .transition()
+        .duration(500)
+        .attr("r", 1)
+        .style("opacity", 0.3)
     svg.selectAll('circle')
         .data(data)
+        .filter(function (d) {
+            return Inst[d.Institution]
+        })
         .transition()
         .duration(500)
         .attr('r', (d, i) => Z(parseInt(d[z_attr])))
-        .style('fill', (d, i) => COLOR(d["Institution"]))
         .style("opacity", 0.7)
+    chart1
+        .selectAll("circle")
+        .transition()
+        .duration(500)
+        .attr("r", d => (Math.sqrt(d.weight) * 1.5 + 0.6) / 2)
+        .style("opacity", 0.3)
     chart1.selectAll("circle")
+        .filter(function (d) {
+            return (!InInst[d.id]) || Inst[d.id]
+        })
         .transition()
         .duration(500)
         .attr("r", d => Math.sqrt(d.weight) * 1.5 + 0.6)
-        .style("fill", function (e, d) {
-            if (deg[e.id] == 1) return colorset[0]
-            else if (e.weight <= 20) return colorset[1]
-            else if (e.weight <= 80) return colorset[2]
-            else if (e.weight <= 150) return colorset[3]
-            else return colorset[4]
-        })
         .style("opacity", 0.7)
     chart1.selectAll("line")
         .transition()
@@ -176,8 +184,71 @@ function reset () {
         .attr("stroke-opacity", 0.6)
 }
 
+function flip(institution){
+    if (institution == "All"){
+        if (Inst[institution]){
+            for (var i = 0; i < allGroup.length; ++i){
+                Inst[allGroup[i]] = 0
+            }
+        } else{
+            for (var i = 0; i < allGroup.length; ++i){
+                Inst[allGroup[i]] = 1
+            }
+        }
+    }else{
+        Inst[institution] = 1 - Inst[institution]
+    }
+    reset()
+    return Inst[institution]
+}
 
 function draw_chart1 () {
+
+    
+    //set iteractive legends
+    var legend = chart1.selectAll(".legend")
+        .data(COLOR.domain())
+        .enter().append("g")
+        .classed("legend", true)
+        .attr("transform", function (d, i) {
+            Inst[d] = 1
+            InInst[d] = 1
+            return "translate(0," + i * height0 / 30 + ")"
+        })
+    legend.on("click", function (d, i) {
+        if (flip(i)){
+            if (i == "All"){
+                d3.selectAll(".legend")
+                    .style("opacity", 1)
+            } else {
+                d3.select(this)
+                    .style("opacity", 1)
+            }
+        } else {
+            if (i == "All"){
+                d3.selectAll(".legend")
+                    .style("opacity", 0.3)
+            } else {
+                d3.select(this)
+                    .style("opacity", 0.3)
+            }
+        }
+    })
+    legend.append("rect")
+        .data(COLOR.domain())
+        .attr("x", width / 20)
+        .attr("y", height / 20)
+        .attr("width", 12)
+        .attr("height", 12)
+        .style("fill", d => COLOR(d))
+
+    legend.append("text")
+        .attr("x", width / 20 + 20)
+        .attr("y", height / 20 + 10)
+        //.attr("dy", ".65em")
+        .text(function (d) {
+            return d
+        })
     // width *= 2
     // height *= 2
 
@@ -211,11 +282,16 @@ function draw_chart1 () {
     var circles = node.append("circle")
         .attr("r", d => Math.sqrt(d.weight) * 1.5 + 0.6)
         .attr("fill", function (e, d) {
-            if (deg[e.id] == 1) return colorset[0]
-            else if (e.weight <= 20) return colorset[1]
-            else if (e.weight <= 80) return colorset[2]
-            else if (e.weight <= 150) return colorset[3]
-            else return colorset[4]
+            if (InInst[e.id]){
+                return COLOR(e.id)
+            } else{
+                return "lightgrey"
+            }
+            // if (deg[e.id] == 1) return colorset[0]
+            // else if (e.weight <= 20) return colorset[1]
+            // else if (e.weight <= 80) return colorset[2]
+            // else if (e.weight <= 150) return colorset[3]
+            // else return colorset[4]
         })
         .style("opacity", 0.7)
         .on('mouseover', function (e, d) {
@@ -263,7 +339,7 @@ function draw_chart1 () {
 function draw_chart2 () {
     //right之前是0.5
     let padding = { 'left': 0.1 * width, 'bottom': 0.1 * height, 'top': 0.1 * height, 'right': 0.05 * width }
-    var allGroup = ["All"]
+    allGroup = ["All"]
     //console.log(String(data[0].Institution))
     for (var i = 0; i < data.length; i++) {
         flag = true
@@ -285,11 +361,11 @@ function draw_chart2 () {
     //console.log(allGroup.length);
     //console.log(colorgroup.length)
     // title
-    svg.append('g')
-        .attr('transform', `translate(${padding.left + (width - padding.left - padding.right) / 2 - 180}, ${padding.top * 0.4})`)
-        .append('text')
-        .attr('class', 'title')
-        .text('A Visualization for Faculties That Research on Computer Science in Well-known Universities')
+    // svg.append('g')
+    //     .attr('transform', `translate(${padding.left + (width - padding.left - padding.right) / 2 - 180}, ${padding.top * 0.4})`)
+    //     .append('text')
+    //     .attr('class', 'title')
+    //     .text('A Visualization for Faculties That Research on Computer Science in Well-known Universities')
 
     let xlimleft = get_min_max(data, x_attr)[0]
     let xlimright = get_min_max(data, x_attr)[1]
@@ -320,7 +396,6 @@ function draw_chart2 () {
         .domain(allGroup)
         .range(colorgroup)
 
-    console.log(COLOR("Stanford University"))
     // x axis
     let xxs = svg.append('g')
         .attr('transform', `translate(${0}, ${height - padding.bottom})`)
@@ -352,39 +427,6 @@ function draw_chart2 () {
         .attr('dy', -height * 0.1)
         .text(y_attr)
 
-    //set iteractive legends
-    // var legend = svg.selectAll(".legend")
-    //     .data(color.domain())
-    //     .enter().append("g")
-    //     .classed("legend", true)
-    //     .attr("transform", function (d, i) {
-    //         return "translate(0," + i * 20 + ")"
-    //     })
-    // legend.on("click", function (d, i) {
-    //     d3.selectAll(".legend")
-    //         .style("opacity", 0.3)
-    //     // make the one selected be un-dimmed
-    //     d3.select(this)
-    //         .style("opacity", 1)
-    //     updateChart(i)
-    //     //console.log(colorgroup.length);
-    //     //console.log(color.domain());
-    // })
-    // legend.append("rect")
-    //     .data(color.domain())
-    //     .attr("x", 0.95*width0)
-    //     .attr("y", 0.1*height0)
-    //     .attr("width", 12)
-    //     .attr("height", 12)
-    //     .style("fill", color)
-
-    // legend.append("text")
-    //     .attr("x", width - 300)
-    //     .attr("y", 110)
-    //     //.attr("dy", ".65em")
-    //     .text(function (d) {
-    //         return d
-    //     })
 
     // points
     svg.append('g')
@@ -565,12 +607,9 @@ function draw_chart3 () {
     var path = d3.geoPath()
         .projection(projection)
         
-    console.log(dataGeo)
-    console.log(graph)
     ready(dataGeo, graph)
     function ready (dataGeo, data) {
         link = []
-        console.log("1")
         //console.log(+dic["Zhejiang University"][0])
         let source = [+dic["Zhejiang University"][1], +dic["Zhejiang University"][0]]
         //console.log(typeof(source))
@@ -584,7 +623,6 @@ function draw_chart3 () {
         //
         link.push(topush1)
         link.push(topush2)
-        console.log(link)
         // let links = data.links
         // for (l in data.links) {
         //     //topush = { type: "LineString", coordinates: [source, target] }
