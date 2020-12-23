@@ -191,17 +191,12 @@ function fading (selected_ins) {
             return d.type == "LineString"
         })
         .filter(function (d){
-            if (InInst[selected_ins]){
-                console.log(d.coordinates[0] == swap(dic[selected_ins]))
-                return d.coordinates[0] == swap(dic[selected_ins])
-            } else{
-                return false
-            }
+            return d.from == selected_ins
         })
         .transition()
         .duration(500)
-        .style("opacity", 0.9)
-        .style("stroke-width", 10)
+        .style("opacity", 0.8)
+        .style("stroke-width", 5)
         // .data(link)
         // .enter()
         // .append("path")
@@ -245,6 +240,27 @@ function reset () {
         .duration(500)
         .attr("stroke-width",d => Math.sqrt(d.weight)) 
         .attr("stroke-opacity", 0.6)
+    
+    
+    chart3.selectAll("path")
+        .filter(function (d){
+            return d.type == "LineString"
+        })
+        .transition()
+        .duration(500)
+        .style("opacity", 0.1)
+        .style("stroke-width", 1)
+    chart3.selectAll("path")
+        .filter(function (d){
+            return d.type == "LineString"
+        })
+        .filter(function (d){
+            return Inst[d.from]
+        })
+        .transition()
+        .duration(500)
+        .style("opacity", 0.3)
+        .style("stroke-width", 2)
 }
 
 function flip(institution){
@@ -680,7 +696,7 @@ function draw_chart3 () {
             if (InInst[S] && InInst[T]){
                 let source = swap(dic[S])
                 let target = swap(dic[T])
-                topush = { type: "LineString", coordinates: [source, target] }
+                topush = { type: "LineString", coordinates: [source, target], from: S }
                 link.push(topush)
             }
         }
@@ -715,7 +731,7 @@ function draw_chart3 () {
             .style("fill", "none")
             .style("opacity", 0.3)
             .style("stroke", "#69b3a2")
-            .style("stroke-width", 1)
+            .style("stroke-width", 2)
 
     }
 }
