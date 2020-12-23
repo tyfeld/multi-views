@@ -184,7 +184,7 @@ function fading (selected_ins) {
         })
         .transition()
         .duration(500)
-        .style("opacity", 0.1)
+        .style("opacity", 0)
         .style("stroke-width", 1)
     chart3.selectAll("path")
         .filter(function (d) {
@@ -252,7 +252,7 @@ function reset () {
         })
         .transition()
         .duration(500)
-        .style("opacity", 0.1)
+        .style("opacity", 0)
         .style("stroke-width", 1)
     chart3.selectAll("path")
         .filter(function (d){
