@@ -144,7 +144,7 @@ function fading (selected_ins) {
         .duration(500)
         .attr("stroke-width",d => 2*Math.sqrt(d.weight)) 
         .attr("stroke-opacity",1)
-    
+
     chart3.selectAll("path")
         .filter(function (d){
             console.log(d)
@@ -159,6 +159,7 @@ function fading (selected_ins) {
         // .style("stroke", "#69b3a2")
         // .style("stroke-width", 2)
 }
+
 function reset () {
     svg.selectAll("circle")
         .transition()
@@ -643,39 +644,50 @@ function draw_chart3 () {
     var path = d3.geoPath()
         .projection(projection)
         
-    ready(dataGeo, graphh)
-    function ready (dataGeo, data) {
-        let S
-        let T
-        let Links = data.links
-        link = []
-        for (var i = 0; i < Links.length; i++){
-            lk = Links[i]
-            S = lk.source
-            T = lk.target
-            if (InInst[S] && InInst[T]){
-                if (S != "University of California - Berkeley"){
-                    continue
-                }
-                if (T != "Carnegie Mellon University"){
-                    continue
-                }
-                console.log(lk)
-                let source = [+dic[S][1], +dic[S][0]]
-                let target = [+dic[T][1], +dic[T][0]]
-                topush = { type: "LineString", coordinates: [source, target] }
+        ready(dataGeo, graphh)
+        function ready (dataGeo, data) {
+            let S
+            let T
+            let Links = data.links
+            link = []
+            for (var i = 0; i < Links.length; i++){
+                lk = Links[i]
+                S = lk.source
+                T = lk.target
+                if (InInst[S] && InInst[T]){
+                    // if (S != "University of California - Berkeley"){
+                    //     continue
+                    // }
+                    // if (T != "Carnegie Mellon University"){
+                    //     continue
+                    // }
+                    // console.log(lk)
+                    let source = [+dic[S][1], +dic[S][0]]
+                    let target = [+dic[T][1], +dic[T][0]]
+                    topush = { type: "LineString", coordinates: [source, target] }
                 link.push(topush)
             }
         }
 
         for (var i = 1; i < allGroup.length; i++){
             institution = allGroup[i]
-            console.log(institution)
+           // console.log(institution)
             // chart3.append("g") 每个学校画一个点，需要悬停时高亮、显示学校名
             // 悬停时访问fading(institution)
             // 离开访问reset()
         }
+        // }
+    //     chart3.append("g")
+    // .selectAll("g")
+    // .data(link)
+    // .enter()
+    //   .append("g")
+    //   .attr("transform", function(d) { return "translate(" + projection(d.coordinates[0]) + ")"; })
+    //   .append("circle")
+    //   .attr("r", 3)
+    //   .attr("fill","red")
 
+        console.log(link)
         // Draw the map
         chart3.append("g")
             .selectAll("path")
@@ -699,6 +711,5 @@ function draw_chart3 () {
             .style("opacity", 0.6)
             .style("stroke", "#69b3a2")
             .style("stroke-width", 1)
-
     }
 }
