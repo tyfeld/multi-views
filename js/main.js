@@ -366,6 +366,13 @@ function draw_chart1 () {
         .selectAll("g")
         .data(graph.nodes)
         .enter().append("g")
+    
+    chart1.append('g')
+        .attr('transform', `translate(${width / 2 - 80}, ${height / 10})`)
+        .append('text')
+        .attr('class', 'title')
+        .text('A Visualization for Faculties That Research on Computer Science in Well-known Universities')
+
 
     var circles = node.append("circle")
         .attr("r", d => Math.sqrt(d.weight) * 1.5 + 0.6)
@@ -684,8 +691,8 @@ function dragended (event) {
 function draw_chart3 () {
     // Map and projection
     var projection = d3.geoMercator()
-        .scale(85)
-        .translate([width / 2, height / 2 * 1.3])
+        .scale(140)
+        .translate([width / 2, height / 2 * 1.5])
 
     // A path generator
     var path = d3.geoPath()
