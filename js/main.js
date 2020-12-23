@@ -17,6 +17,35 @@ let COLOR
 let Z
 let Inst = {}
 let InInst = {}
+var dic = {
+    "Zhejiang University": [30, 120],
+    "University of Wisconsin - Madison": [43, -89],
+    "University of Washington": [47.6552486665003, -122.30317127051103],
+    "University of Toronto": [43.66275686893587, -79.39517648781622],
+    "University of Texas at Austin": [30.284845505847017, -97.73211179735068],
+    "University of Pennsylvania": [39.952120085194736, -75.19397544980907],
+    "University of Michigan": [42.27812296061746, -83.73883564602421],
+    "University of Maryland - College Park": [38.98690160073411, -76.94371301678451],
+    "University of Illinois at Urbana-Champaign": [40.10231336359896, -88.22714004475033],
+    "University of California - San Diego": [32.879985535825405, -117.22810540359342],
+    "University of California - Los Angeles": [34.06890320583523, -118.4457926462734],
+    "University of California - Berkeley": [37.87183142623608, -122.2580034606744],
+    "Tsinghua University": [39.9996427230006, 116.32627223619201],
+    "The Hong Kong University of Science and Technology": [22.336439480645065, 114.26605558313804],
+    "Swiss Federal Institute of Technology Zurich": [47.376454267238536, 8.54744560760998],
+    "Stanford University": [37.42761932000053, -122.17038419035946],
+    "Shanghai Jiao Tong University": [31.02544073666434, 121.43345653222954],
+    "Peking University": [39.986896538739906, 116.30568077851892],
+    "Nanjing University": [32.05698456787325, 118.77945372381834],
+    "Massachusetts Institute of Technology": [42.36009097919115, -71.09490029205767],
+    "Israel Institute of Technology": [32.77658884700195, 35.022601384383165],
+    "Georgia Institute of Technology": [33.77565345282007, -84.39540523802785],
+    "Fudan University": [31.29729133496868, 121.50370362801782],
+    "Cornell University": [42.453715563185305, -76.47112568170417],
+    "Columbia University": [40.80758028877325, -73.96278294025446],
+    "Chinese University of Hong Kong": [22.419218350704284, 114.20684642783078],
+    "Carnegie Mellon University": [40.4428538577235, -79.94350237306628],
+}
 
 let data = null
 let graph = null
@@ -93,6 +122,10 @@ function get_min_max (data, attr) {
     return [min, max]
 }
 
+function swap (xx) {
+    return [xx[1], xx[0]]
+}
+
 
 // interactived group selection
 function fading (selected_ins) {
@@ -130,34 +163,53 @@ function fading (selected_ins) {
         .duration(500)
         .attr("r", d => 3 * (Math.sqrt(d.weight) * 1.5 + 0.6) / 2)
         .style("opacity", 0.9)
-        
+
     chart1.selectAll("line")
         .transition()
         .duration(500)
-        .attr("stroke-width",d => 0.5*Math.sqrt(d.weight)) 
+        .attr("stroke-width", d => 0.5 * Math.sqrt(d.weight))
         .attr("stroke-opacity", 0.2)
     chart1.selectAll("line")
         .filter(function (d) {
-            return d.source.id == selected_ins;
+            return d.source.id == selected_ins
         })
         .transition()
         .duration(500)
-        .attr("stroke-width",d => 2*Math.sqrt(d.weight)) 
-        .attr("stroke-opacity",1)
+        .attr("stroke-width", d => 2 * Math.sqrt(d.weight))
+        .attr("stroke-opacity", 1)
 
     chart3.selectAll("path")
-        .filter(function (d){
-            console.log(d)
-            return true
+        .filter(function (d) {
+            return d.type == "LineString"
         })
-        // .data(link)
-        // .enter()
-        // .append("path")
-        // .attr("d", function (d) { return path(d) })
-        // .style("fill", "none")
-        // .style("opacity", 0.6)
-        // .style("stroke", "#69b3a2")
-        // .style("stroke-width", 2)
+        .transition()
+        .duration(500)
+        .style("opacity", 0.1)
+        .style("stroke-width", 1)
+    chart3.selectAll("path")
+        .filter(function (d) {
+            return d.type == "LineString"
+        })
+        .filter(function (d) {
+            if (InInst[selected_ins]) {
+                console.log(d.coordinates[0] == swap(dic[selected_ins]))
+                return d.coordinates[0] == swap(dic[selected_ins])
+            } else {
+                return false
+            }
+        })
+        .transition()
+        .duration(500)
+        .style("opacity", 0.9)
+        .style("stroke-width", 10)
+    // .data(link)
+    // .enter()
+    // .append("path")
+    // .attr("d", function (d) { return path(d) })
+    // .style("fill", "none")
+    // .style("opacity", 0.6)
+    // .style("stroke", "#69b3a2")
+    // .style("stroke-width", 2)
 }
 
 function reset () {
@@ -192,22 +244,22 @@ function reset () {
     chart1.selectAll("line")
         .transition()
         .duration(500)
-        .attr("stroke-width",d => Math.sqrt(d.weight)) 
+        .attr("stroke-width", d => Math.sqrt(d.weight))
         .attr("stroke-opacity", 0.6)
 }
 
-function flip(institution){
-    if (institution == "All"){
-        if (Inst[institution]){
-            for (var i = 0; i < allGroup.length; ++i){
+function flip (institution) {
+    if (institution == "All") {
+        if (Inst[institution]) {
+            for (var i = 0; i < allGroup.length; ++i) {
                 Inst[allGroup[i]] = 0
             }
-        } else{
-            for (var i = 0; i < allGroup.length; ++i){
+        } else {
+            for (var i = 0; i < allGroup.length; ++i) {
                 Inst[allGroup[i]] = 1
             }
         }
-    }else{
+    } else {
         Inst[institution] = 1 - Inst[institution]
     }
     reset()
@@ -216,7 +268,7 @@ function flip(institution){
 
 function draw_chart1 () {
 
-    
+
     //set iteractive legends
     var legend = chart1.selectAll(".legend")
         .data(COLOR.domain())
@@ -228,8 +280,8 @@ function draw_chart1 () {
             return "translate(0," + i * height0 / 30 + ")"
         })
     legend.on("click", function (d, i) {
-        if (flip(i)){
-            if (i == "All"){
+        if (flip(i)) {
+            if (i == "All") {
                 d3.selectAll(".legend")
                     .style("opacity", 1)
             } else {
@@ -237,7 +289,7 @@ function draw_chart1 () {
                     .style("opacity", 1)
             }
         } else {
-            if (i == "All"){
+            if (i == "All") {
                 d3.selectAll(".legend")
                     .style("opacity", 0.3)
             } else {
@@ -283,7 +335,7 @@ function draw_chart1 () {
         .data(graph.links)
         .enter().append("line")
         .attr("stroke-width", function (d) { return Math.sqrt(d.weight) })
-        .attr("stroke-opacity",0.6)
+        .attr("stroke-opacity", 0.6)
 
     var node = chart1.append("g")
         .attr("class", "nodes")
@@ -294,9 +346,9 @@ function draw_chart1 () {
     var circles = node.append("circle")
         .attr("r", d => Math.sqrt(d.weight) * 1.5 + 0.6)
         .attr("fill", function (e, d) {
-            if (InInst[e.id]){
+            if (InInst[e.id]) {
                 return COLOR(e.id)
-            } else{
+            } else {
                 return "lightgrey"
             }
             // if (deg[e.id] == 1) return colorset[0]
@@ -606,35 +658,6 @@ function dragended (event) {
 
 
 function draw_chart3 () {
-    var dic = {
-        "Zhejiang University": [30, 120],
-        "University of Wisconsin - Madison": [43, -89],
-        "University of Washington": [47.6552486665003, -122.30317127051103],
-        "University of Toronto": [43.66275686893587, -79.39517648781622],
-        "University of Texas at Austin":[30.284845505847017, -97.73211179735068],
-        "University of Pennsylvania":[39.952120085194736, -75.19397544980907],
-        "University of Michigan":[42.27812296061746, -83.73883564602421],
-        "University of Maryland - College Park":[38.98690160073411, -76.94371301678451],
-        "University of Illinois at Urbana-Champaign":[40.10231336359896, -88.22714004475033],
-        "University of California - San Diego":[32.879985535825405, -117.22810540359342],
-        "University of California - Los Angeles":[34.06890320583523, -118.4457926462734],
-        "University of California - Berkeley":[37.87183142623608, -122.2580034606744],
-        "Tsinghua University":[39.9996427230006, 116.32627223619201],
-        "The Hong Kong University of Science and Technology":[22.336439480645065, 114.26605558313804],
-        "Swiss Federal Institute of Technology Zuric":[47.376454267238536, 8.54744560760998],
-        "Stanford University":[37.42761932000053, -122.17038419035946],
-        "Shanghai Jiao Tong University":[31.02544073666434, 121.43345653222954],
-        "Peking University":[39.986896538739906, 116.30568077851892],
-        "Nanjing University":[32.05698456787325, 118.77945372381834],
-        "Massachusetts Institute of Technology":[42.36009097919115, -71.09490029205767],
-        "Israel Institute of Technology":[32.77658884700195, 35.022601384383165],
-        "Georgia Institute of Technology":[33.77565345282007, -84.39540523802785],
-        "Fudan University":[31.29729133496868, 121.50370362801782],
-        "Cornell University":[42.453715563185305, -76.47112568170417],
-        "Columbia University":[40.80758028877325, -73.96278294025446],
-        "Chinese University of Hong Kong":[22.419218350704284, 114.20684642783078],
-        "Carnegie Mellon University":[40.4428538577235, -79.94350237306628],
-    }
     // Map and projection
     var projection = d3.geoMercator()
         .scale(85)
@@ -643,49 +666,50 @@ function draw_chart3 () {
     // A path generator
     var path = d3.geoPath()
         .projection(projection)
-        
-        ready(dataGeo, graphh)
-        function ready (dataGeo, data) {
-            let S
-            let T
-            let Links = data.links
-            link = []
-            for (var i = 0; i < Links.length; i++){
-                lk = Links[i]
-                S = lk.source
-                T = lk.target
-                if (InInst[S] && InInst[T]){
-                    // if (S != "University of California - Berkeley"){
-                    //     continue
-                    // }
-                    // if (T != "Carnegie Mellon University"){
-                    //     continue
-                    // }
-                    // console.log(lk)
-                    let source = [+dic[S][1], +dic[S][0]]
-                    let target = [+dic[T][1], +dic[T][0]]
-                    topush = { type: "LineString", coordinates: [source, target] }
+
+    ready(dataGeo, graphh)
+
+    function ready (dataGeo, data) {
+        let S
+        let T
+        let Links = data.links
+        link = []
+        for (var i = 0; i < Links.length; i++) {
+            lk = Links[i]
+            S = lk.source
+            T = lk.target
+            if (InInst[S] && InInst[T]) {
+                let source = swap(dic[S])
+                let target = swap(dic[T])
+                topush = { type: "LineString", coordinates: [source, target] }
                 link.push(topush)
             }
         }
 
-        for (var i = 1; i < allGroup.length; i++){
-            institution = allGroup[i]
-           // console.log(institution)
-            // chart3.append("g") 每个学校画一个点，需要悬停时高亮、显示学校名
-            // 悬停时访问fading(institution)
-            // 离开访问reset()
-        }
+        // for (var i = 1; i < allGroup.length; i++) {
+        //     institution = allGroup[i]
+        //     chart3.append("g")
+        //     .selectAll("circle")
+        //     .enter()
+        //     .attr("transform", function (d) { return "translate(" + projection(dic[institution]) + ")" })
+        //     .append("circle")
+        //     .attr("r", 3)
+        //     .attr("fill", "red")
+        //     // console.log(institution)
+        //     // chart3.append("g") 每个学校画一个点，需要悬停时高亮、显示学校名
+        //     // 悬停时访问fading(institution)
+        //     // 离开访问reset()
         // }
-    //     chart3.append("g")
-    // .selectAll("g")
-    // .data(link)
-    // .enter()
-    //   .append("g")
-    //   .attr("transform", function(d) { return "translate(" + projection(d.coordinates[0]) + ")"; })
-    //   .append("circle")
-    //   .attr("r", 3)
-    //   .attr("fill","red")
+        // // }
+        chart3.append("g")
+            .selectAll("circ")
+            .data(allGroup)
+            .enter()
+            .append("g")
+            .attr("transform", function (d) { return "translate(" + projection(dic[d]) + ")" })
+            .append("circle")
+            .attr("r", 3)
+            .attr("fill", "red")
 
         console.log(link)
         // Draw the map
@@ -708,7 +732,7 @@ function draw_chart3 () {
             .attr("d", function (d) { return path(d) })
             //.attr("d", path(link))
             .style("fill", "none")
-            .style("opacity", 0.6)
+            .style("opacity", 0.3)
             .style("stroke", "#69b3a2")
             .style("stroke-width", 1)
     }
