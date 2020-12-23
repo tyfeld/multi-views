@@ -701,15 +701,18 @@ function draw_chart3 () {
         //     // 离开访问reset()
         // }
         // // }
+        console.log(dic.length)
         chart3.append("g")
             .selectAll("circ")
-            .data(allGroup)
+            .data(COLOR.domain())
             .enter()
-            .append("g")
+            .append("circle")
             .attr("transform", function (d) { return "translate(" + projection(dic[d]) + ")" })
             .append("circle")
             .attr("r", 3)
             .attr("fill", "red")
+
+          
 
         console.log(link)
         // Draw the map
