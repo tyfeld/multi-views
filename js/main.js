@@ -686,31 +686,7 @@ function draw_chart3 () {
             }
         }
 
-        // for (var i = 1; i < allGroup.length; i++) {
-        //     institution = allGroup[i]
-        //     chart3.append("g")
-        //     .selectAll("circle")
-        //     .enter()
-        //     .attr("transform", function (d) { return "translate(" + projection(dic[institution]) + ")" })
-        //     .append("circle")
-        //     .attr("r", 3)
-        //     .attr("fill", "red")
-        //     // console.log(institution)
-        //     // chart3.append("g") 每个学校画一个点，需要悬停时高亮、显示学校名
-        //     // 悬停时访问fading(institution)
-        //     // 离开访问reset()
-        // }
-        // // }
-        console.log(dic.length)
-        chart3.append("g")
-            .selectAll("circ")
-            .data(COLOR.domain())
-            .enter()
-            .append("circle")
-            .attr("transform", function (d) { return "translate(" + projection(dic[d]) + ")" })
-            .append("circle")
-            .attr("r", 3)
-            .attr("fill", "red")
+        
 
           
 
