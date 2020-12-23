@@ -597,6 +597,31 @@ function draw_chart3 () {
     var dic = {
         "Zhejiang University": [30, 120],
         "University of Wisconsin - Madison": [43, -89],
+        "University of Washington": [47.6552486665003, -122.30317127051103],
+        "University of Toronto": [43.66275686893587, -79.39517648781622],
+        "University of Texas at Austin":[30.284845505847017, -97.73211179735068],
+        "University of Pennsylvania":[39.952120085194736, -75.19397544980907],
+        "University of Michigan":[42.27812296061746, -83.73883564602421],
+        "University of Maryland - College Park":[38.98690160073411, -76.94371301678451],
+        "University of Illinois at Urbana-Champaign":[40.10231336359896, -88.22714004475033],
+        "University of California - San Diego":[32.879985535825405, -117.22810540359342],
+        "University of California - Los Angeles":[34.06890320583523, -118.4457926462734],
+        "University of California - Berkeley":[37.87183142623608, -122.2580034606744],
+        "Tsinghua University":[39.9996427230006, 116.32627223619201],
+        "The Hong Kong University of Science and Technology":[22.336439480645065, 114.26605558313804],
+        "Swiss Federal Institute of Technology Zuric":[47.376454267238536, 8.54744560760998],
+        "Stanford University":[37.42761932000053, -122.17038419035946],
+        "Shanghai Jiao Tong University":[31.02544073666434, 121.43345653222954],
+        "Peking University":[39.986896538739906, 116.30568077851892],
+        "Nanjing University":[32.05698456787325, 118.77945372381834],
+        "Massachusetts Institute of Technology":[42.36009097919115, -71.09490029205767],
+        "Israel Institute of Technology":[32.77658884700195, 35.022601384383165],
+        "Georgia Institute of Technology":[33.77565345282007, -84.39540523802785],
+        "Fudan University":[31.29729133496868, 121.50370362801782],
+        "Cornell University":[42.453715563185305, -76.47112568170417],
+        "Columbia University":[40.80758028877325, -73.96278294025446],
+        "Chinese University of Hong Kong":[22.419218350704284, 114.20684642783078],
+        "Carnegie Mellon University":[40.4428538577235, -79.94350237306628],
     }
     // Map and projection
     var projection = d3.geoMercator()
@@ -611,24 +636,33 @@ function draw_chart3 () {
     function ready (dataGeo, data) {
         link = []
         //console.log(+dic["Zhejiang University"][0])
-        let source = [+dic["Zhejiang University"][1], +dic["Zhejiang University"][0]]
+        // let source = [+dic["Zhejiang University"][1], +dic["Zhejiang University"][0]]
         //console.log(typeof(source))
-        let target = [+dic["University of Wisconsin - Madison"][1], +dic["University of Wisconsin - Madison"][0]]
+        //let target = [+dic["University of Wisconsin - Madison"][1], +dic["University of Wisconsin - Madison"][0]]
         //console.log([source, target])
         // Reformat the list of link. Note that columns in csv file are called long1, long2,    lat1[], lat2
-        topush1 = { type: "LineString", coordinates: [source, target] }
-        topush2 = { type: "LineString", coordinates: [[100, 60], [-60, -30]] }
+        //topush1 = { type: "LineString", coordinates: [source, target] }
+        //topush2 = { type: "LineString", coordinates: [[100, 60], [-60, -30]] }
         //console.log((topush.coordinates))
         //var link = {type: "LineString", coordinates: }
         //
-        link.push(topush1)
-        link.push(topush2)
-        // let links = data.links
-        // for (l in data.links) {
+        //link.push(topush1)
+        //link.push(topush2)
+        let links = data.links
+        for (l in data.links) {
+            ss = links[l].source
+            tt = links[l].target
+            if (ss in dic && tt in dic){
+                source = [dic[ss][1],dic[ss][0]]
+                target = [dic[tt][1],dic[tt][0]]
+                topush = { type: "LineString", coordinates: [source, target] }
+                link.push(topush)
+            }
+        }
         //     //topush = { type: "LineString", coordinates: [source, target] }
         //     //link.push(topush)
         // }
-
+        console.log(link)
         // Draw the map
         chart3.append("g")
             .selectAll("path")
@@ -650,15 +684,7 @@ function draw_chart3 () {
             //.attr("d", path(link))
             .style("fill", "none")
             .style("stroke", "#69b3a2")
-            .style("stroke-width", 2)
+            .style("stroke-width", 1)
 
     }
 }
-
-
-
-
-
-
-
-
