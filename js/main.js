@@ -184,32 +184,30 @@ function fading (selected_ins) {
         })
         .transition()
         .duration(500)
-        .style("opacity", 0.1)
+        .style("opacity", 0)
         .style("stroke-width", 1)
     chart3.selectAll("path")
         .filter(function (d) {
             return d.type == "LineString"
         })
-        .filter(function (d) {
-            if (InInst[selected_ins]) {
-                console.log(d.coordinates[0] == swap(dic[selected_ins]))
-                return d.coordinates[0] == swap(dic[selected_ins])
-            } else {
-                return false
-            }
+        .filter(function (d){
+            return d.from == selected_ins
         })
         .transition()
         .duration(500)
-        .style("opacity", 0.9)
-        .style("stroke-width", 10)
-    // .data(link)
-    // .enter()
-    // .append("path")
-    // .attr("d", function (d) { return path(d) })
-    // .style("fill", "none")
-    // .style("opacity", 0.6)
-    // .style("stroke", "#69b3a2")
-    // .style("stroke-width", 2)
+        .style("opacity", 0.8)
+        .style("stroke-width", 5)
+    chart3.selectAll("circle")
+        .transition()
+        .duration(500)
+        .attr("r", 1)
+    chart3.selectAll("circle")
+        .transition()
+        .duration(500)
+        .filter(function(d){
+            return d == selected_ins
+        })
+        .attr("r", 10)
 }
 
 function reset () {
@@ -246,6 +244,32 @@ function reset () {
         .duration(500)
         .attr("stroke-width", d => Math.sqrt(d.weight))
         .attr("stroke-opacity", 0.6)
+    
+    
+    chart3.selectAll("path")
+        .filter(function (d){
+            return d.type == "LineString"
+        })
+        .transition()
+        .duration(500)
+        .style("opacity", 0)
+        .style("stroke-width", 1)
+    chart3.selectAll("path")
+        .filter(function (d){
+            return d.type == "LineString"
+        })
+        .filter(function (d){
+            return Inst[d.from]
+        })
+        .transition()
+        .duration(500)
+        .style("opacity", 0.3)
+        .style("stroke-width", 2)
+    
+    chart3.selectAll("circle")
+        .transition()
+        .duration(500)
+        .attr("r", 3)
 }
 
 function flip (institution) {
@@ -342,6 +366,14 @@ function draw_chart1 () {
         .selectAll("g")
         .data(graph.nodes)
         .enter().append("g")
+    
+    chart1.append('g')
+        .attr('transform', `translate(${width / 2 - 200}, ${height / 10})`)
+        .append('text')
+        .attr('class', 'title')
+        .attr('font-size', 20)
+        .text('A Visualization for Faculties That Research on Computer Science in Well-known Universities')
+
 
     var circles = node.append("circle")
         .attr("r", d => Math.sqrt(d.weight) * 1.5 + 0.6)
@@ -660,8 +692,8 @@ function dragended (event) {
 function draw_chart3 () {
     // Map and projection
     var projection = d3.geoMercator()
-        .scale(85)
-        .translate([width / 2, height / 2 * 1.3])
+        .scale(140)
+        .translate([width / 2, height / 2 * 1.5])
 
     // A path generator
     var path = d3.geoPath()
@@ -681,16 +713,27 @@ function draw_chart3 () {
             if (InInst[S] && InInst[T]) {
                 let source = swap(dic[S])
                 let target = swap(dic[T])
-                topush = { type: "LineString", coordinates: [source, target] }
+                topush = { type: "LineString", coordinates: [source, target], from: S }
                 link.push(topush)
             }
         }
 
-        
+        // for (var i = 1; i < allGroup.length; i++) {
+        //     institution = allGroup[i]
+        //     chart3.append("g")
+        //     .selectAll("circle")
+        //     .enter()
+        //     .attr("transform", function (d) { return "translate(" + projection(dic[institution]) + ")" })
+        //     .append("circle")
+        //     .attr("r", 3)
+        //     .attr("fill", "red")
+        //     // console.log(institution)
+        //     // chart3.append("g") 每个学校画一个点，需要悬停时高亮、显示学校名
+        //     // 悬停时访问fading(institution)
+        //     // 离开访问reset()
+        // }
+        // // }
 
-          
-
-        console.log(link)
         // Draw the map
         chart3.append("g")
             .selectAll("path")
@@ -713,6 +756,33 @@ function draw_chart3 () {
             .style("fill", "none")
             .style("opacity", 0.3)
             .style("stroke", "#69b3a2")
-            .style("stroke-width", 1)
+            .style("stroke-width", 2)
+        var node = chart3.append("g")
+            .selectAll("circ")
+            .data(allGroup)
+            .enter()
+            .filter(function(d){
+                return d != "All"
+            })
+            .append("g")
+            .attr("transform", function (d) {
+                    return "translate(" + projection(swap(dic[d])) + ")"
+            })
+        
+        node.append("circle")
+            .attr("r", 3)
+            .attr("opacity", 0.8)
+            .attr("fill", d => COLOR(d))
+            .on('mouseover', (e, d) => fading(d))
+            .on('mouseleave', reset)
+        node.append("title")
+            .text(d => d)
+        chart3.append('g')
+            .attr('transform', `translate(${width / 2 - 120}, ${0.95 * height})`)
+            .append('text')
+            .attr('class', 'title')
+            .attr('font-size', 25)
+            .text('A World Map Showing the Flow of PhD')
+    
     }
 }
