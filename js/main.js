@@ -20,6 +20,7 @@ let InInst = {}
 
 let data = null
 let graph = null
+let graphh = null
 let dataGeo = null
 let data_file = './data/data.csv'
 let ua = navigator.userAgent.toLowerCase()
@@ -56,7 +57,7 @@ d3.json("./data/data.json").then(function (DATA) {
 Promise.all([d3.json("./data/world.geojson"),
 d3.json("./data/data.json")]).then(function (DATA) {
     dataGeo = DATA[0]
-    graph = DATA[1]
+    graphh = DATA[1]
     draw_chart3()
 })
 
@@ -143,10 +144,20 @@ function fading (selected_ins) {
         .duration(500)
         .attr("stroke-width",d => 2*Math.sqrt(d.weight)) 
         .attr("stroke-opacity",1)
-        
-    // node.append("title")
-    //     .text(function (d) { 
-    //         return d.id })
+    
+    chart3.selectAll("path")
+        .filter(function (d){
+            console.log(d)
+            return true
+        })
+        // .data(link)
+        // .enter()
+        // .append("path")
+        // .attr("d", function (d) { return path(d) })
+        // .style("fill", "none")
+        // .style("opacity", 0.6)
+        // .style("stroke", "#69b3a2")
+        // .style("stroke-width", 2)
 }
 function reset () {
     svg.selectAll("circle")
@@ -597,6 +608,7 @@ function draw_chart3 () {
     var dic = {
         "Zhejiang University": [30, 120],
         "University of Wisconsin - Madison": [43, -89],
+        "Tsinghua University": [43, -89],
     }
     // Map and projection
     var projection = d3.geoMercator()
@@ -607,27 +619,38 @@ function draw_chart3 () {
     var path = d3.geoPath()
         .projection(projection)
         
-    ready(dataGeo, graph)
+    ready(dataGeo, graphh)
     function ready (dataGeo, data) {
+        let S
+        let T
+        let Links = data.links
         link = []
-        //console.log(+dic["Zhejiang University"][0])
-        let source = [+dic["Zhejiang University"][1], +dic["Zhejiang University"][0]]
-        //console.log(typeof(source))
-        let target = [+dic["University of Wisconsin - Madison"][1], +dic["University of Wisconsin - Madison"][0]]
-        //console.log([source, target])
-        // Reformat the list of link. Note that columns in csv file are called long1, long2,    lat1[], lat2
-        topush1 = { type: "LineString", coordinates: [source, target] }
-        topush2 = { type: "LineString", coordinates: [[100, 60], [-60, -30]] }
-        //console.log((topush.coordinates))
-        //var link = {type: "LineString", coordinates: }
-        //
-        link.push(topush1)
-        link.push(topush2)
-        // let links = data.links
-        // for (l in data.links) {
-        //     //topush = { type: "LineString", coordinates: [source, target] }
-        //     //link.push(topush)
-        // }
+        for (var i = 0; i < Links.length; i++){
+            lk = Links[i]
+            S = lk.source
+            T = lk.target
+            if (InInst[S] && InInst[T]){
+                if (S != "Zhejiang University"){
+                    continue
+                }
+                if (T != "Tsinghua University"){
+                    continue
+                }
+                console.log(lk)
+                let source = [+dic[S][1], +dic[S][0]]
+                let target = [+dic[T][1], +dic[T][0]]
+                topush = { type: "LineString", coordinates: [source, target] }
+                link.push(topush)
+            }
+        }
+
+        for (var i = 1; i < allGroup.length; i++){
+            institution = allGroup[i]
+            console.log(institution)
+            // chart3.append("g") 每个学校画一个点，需要悬停时高亮、显示学校名
+            // 悬停时访问fading(institution)
+            // 离开访问reset()
+        }
 
         // Draw the map
         chart3.append("g")
@@ -649,6 +672,7 @@ function draw_chart3 () {
             .attr("d", function (d) { return path(d) })
             //.attr("d", path(link))
             .style("fill", "none")
+            .style("opacity", 0.6)
             .style("stroke", "#69b3a2")
             .style("stroke-width", 2)
 
