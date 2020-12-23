@@ -368,9 +368,10 @@ function draw_chart1 () {
         .enter().append("g")
     
     chart1.append('g')
-        .attr('transform', `translate(${width / 2 - 80}, ${height / 10})`)
+        .attr('transform', `translate(${width / 2 - 200}, ${height / 10})`)
         .append('text')
         .attr('class', 'title')
+        .attr('font-size', 20)
         .text('A Visualization for Faculties That Research on Computer Science in Well-known Universities')
 
 
@@ -776,5 +777,12 @@ function draw_chart3 () {
             .on('mouseleave', reset)
         node.append("title")
             .text(d => d)
+        chart3.append('g')
+            .attr('transform', `translate(${width / 2 - 120}, ${0.95 * height})`)
+            .append('text')
+            .attr('class', 'title')
+            .attr('font-size', 25)
+            .text('A World Map Showing the Flow of PhD')
+    
     }
 }
