@@ -17,6 +17,35 @@ let COLOR
 let Z
 let Inst = {}
 let InInst = {}
+var dic = {
+    "Zhejiang University": [30, 120],
+    "University of Wisconsin - Madison": [43, -89],
+    "University of Washington": [47.6552486665003, -122.30317127051103],
+    "University of Toronto": [43.66275686893587, -79.39517648781622],
+    "University of Texas at Austin":[30.284845505847017, -97.73211179735068],
+    "University of Pennsylvania":[39.952120085194736, -75.19397544980907],
+    "University of Michigan":[42.27812296061746, -83.73883564602421],
+    "University of Maryland - College Park":[38.98690160073411, -76.94371301678451],
+    "University of Illinois at Urbana-Champaign":[40.10231336359896, -88.22714004475033],
+    "University of California - San Diego":[32.879985535825405, -117.22810540359342],
+    "University of California - Los Angeles":[34.06890320583523, -118.4457926462734],
+    "University of California - Berkeley":[37.87183142623608, -122.2580034606744],
+    "Tsinghua University":[39.9996427230006, 116.32627223619201],
+    "The Hong Kong University of Science and Technology":[22.336439480645065, 114.26605558313804],
+    "Swiss Federal Institute of Technology Zurich":[47.376454267238536, 8.54744560760998],
+    "Stanford University":[37.42761932000053, -122.17038419035946],
+    "Shanghai Jiao Tong University":[31.02544073666434, 121.43345653222954],
+    "Peking University":[39.986896538739906, 116.30568077851892],
+    "Nanjing University":[32.05698456787325, 118.77945372381834],
+    "Massachusetts Institute of Technology":[42.36009097919115, -71.09490029205767],
+    "Israel Institute of Technology":[32.77658884700195, 35.022601384383165],
+    "Georgia Institute of Technology":[33.77565345282007, -84.39540523802785],
+    "Fudan University":[31.29729133496868, 121.50370362801782],
+    "Cornell University":[42.453715563185305, -76.47112568170417],
+    "Columbia University":[40.80758028877325, -73.96278294025446],
+    "Chinese University of Hong Kong":[22.419218350704284, 114.20684642783078],
+    "Carnegie Mellon University":[40.4428538577235, -79.94350237306628],
+}
 
 let data = null
 let graph = null
@@ -93,6 +122,10 @@ function get_min_max (data, attr) {
     return [min, max]
 }
 
+function swap(xx){
+    return [xx[1], xx[0]]
+}
+
 
 // interactived group selection
 function fading (selected_ins) {
@@ -147,9 +180,28 @@ function fading (selected_ins) {
     
     chart3.selectAll("path")
         .filter(function (d){
-            console.log(d)
-            return true
+            return d.type == "LineString"
         })
+        .transition()
+        .duration(500)
+        .style("opacity", 0.1)
+        .style("stroke-width", 1)
+    chart3.selectAll("path")
+        .filter(function (d){
+            return d.type == "LineString"
+        })
+        .filter(function (d){
+            if (InInst[selected_ins]){
+                console.log(d.coordinates[0] == swap(dic[selected_ins]))
+                return d.coordinates[0] == swap(dic[selected_ins])
+            } else{
+                return false
+            }
+        })
+        .transition()
+        .duration(500)
+        .style("opacity", 0.9)
+        .style("stroke-width", 10)
         // .data(link)
         // .enter()
         // .append("path")
@@ -605,35 +657,6 @@ function dragended (event) {
 
 
 function draw_chart3 () {
-    var dic = {
-        "Zhejiang University": [30, 120],
-        "University of Wisconsin - Madison": [43, -89],
-        "University of Washington": [47.6552486665003, -122.30317127051103],
-        "University of Toronto": [43.66275686893587, -79.39517648781622],
-        "University of Texas at Austin":[30.284845505847017, -97.73211179735068],
-        "University of Pennsylvania":[39.952120085194736, -75.19397544980907],
-        "University of Michigan":[42.27812296061746, -83.73883564602421],
-        "University of Maryland - College Park":[38.98690160073411, -76.94371301678451],
-        "University of Illinois at Urbana-Champaign":[40.10231336359896, -88.22714004475033],
-        "University of California - San Diego":[32.879985535825405, -117.22810540359342],
-        "University of California - Los Angeles":[34.06890320583523, -118.4457926462734],
-        "University of California - Berkeley":[37.87183142623608, -122.2580034606744],
-        "Tsinghua University":[39.9996427230006, 116.32627223619201],
-        "The Hong Kong University of Science and Technology":[22.336439480645065, 114.26605558313804],
-        "Swiss Federal Institute of Technology Zuric":[47.376454267238536, 8.54744560760998],
-        "Stanford University":[37.42761932000053, -122.17038419035946],
-        "Shanghai Jiao Tong University":[31.02544073666434, 121.43345653222954],
-        "Peking University":[39.986896538739906, 116.30568077851892],
-        "Nanjing University":[32.05698456787325, 118.77945372381834],
-        "Massachusetts Institute of Technology":[42.36009097919115, -71.09490029205767],
-        "Israel Institute of Technology":[32.77658884700195, 35.022601384383165],
-        "Georgia Institute of Technology":[33.77565345282007, -84.39540523802785],
-        "Fudan University":[31.29729133496868, 121.50370362801782],
-        "Cornell University":[42.453715563185305, -76.47112568170417],
-        "Columbia University":[40.80758028877325, -73.96278294025446],
-        "Chinese University of Hong Kong":[22.419218350704284, 114.20684642783078],
-        "Carnegie Mellon University":[40.4428538577235, -79.94350237306628],
-    }
     // Map and projection
     var projection = d3.geoMercator()
         .scale(85)
@@ -644,6 +667,7 @@ function draw_chart3 () {
         .projection(projection)
         
     ready(dataGeo, graphh)
+
     function ready (dataGeo, data) {
         let S
         let T
@@ -654,15 +678,8 @@ function draw_chart3 () {
             S = lk.source
             T = lk.target
             if (InInst[S] && InInst[T]){
-                if (S != "University of California - Berkeley"){
-                    continue
-                }
-                if (T != "Carnegie Mellon University"){
-                    continue
-                }
-                console.log(lk)
-                let source = [+dic[S][1], +dic[S][0]]
-                let target = [+dic[T][1], +dic[T][0]]
+                let source = swap(dic[S])
+                let target = swap(dic[T])
                 topush = { type: "LineString", coordinates: [source, target] }
                 link.push(topush)
             }
@@ -696,7 +713,7 @@ function draw_chart3 () {
             .attr("d", function (d) { return path(d) })
             //.attr("d", path(link))
             .style("fill", "none")
-            .style("opacity", 0.6)
+            .style("opacity", 0.3)
             .style("stroke", "#69b3a2")
             .style("stroke-width", 1)
 
