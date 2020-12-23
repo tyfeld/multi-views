@@ -654,6 +654,12 @@ function draw_chart3 () {
             S = lk.source
             T = lk.target
             if (InInst[S] && InInst[T]){
+                if (S != "University of California - Berkeley"){
+                    continue
+                }
+                if (T != "Carnegie Mellon University"){
+                    continue
+                }
                 console.log(lk)
                 let source = [+dic[S][1], +dic[S][0]]
                 let target = [+dic[T][1], +dic[T][0]]
